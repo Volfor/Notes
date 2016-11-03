@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "428122985452",
+    "firebase_url": "https://notes-15777.firebaseio.com",
+    "project_id": "notes-15777",
+    "storage_bucket": "notes-15777.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:428122985452:android:e0cee02164aef551",
+        "android_client_info": {
+          "package_name": "com.github.volfor.notes"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "428122985452-vuo5mohmh0uk0vhr5ibtebo3140irpve.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.github.volfor.notes",
+            "certificate_hash": "9C0E65A46E4906D7929AF4C3B9739B5F97D186D2"
+          }
+        },
+        {
+          "client_id": "428122985452-s93uadbp5783iljghodc6g4js1rrulcs.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDxGZzdKoQXSmseTaE0UT9K8eVJI9w3TLc"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "428122985452-s93uadbp5783iljghodc6g4js1rrulcs.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
