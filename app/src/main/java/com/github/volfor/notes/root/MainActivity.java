@@ -12,14 +12,11 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Toast;
 
-import com.github.volfor.notes.ContributionsFragment;
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.databinding.ActivityMainBinding;
 import com.github.volfor.notes.databinding.DrawerHeaderBinding;
 import com.github.volfor.notes.login.LoginActivity;
-import com.github.volfor.notes.notes.list.NoteListFragment;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
@@ -77,8 +74,6 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         menuItem.setChecked(true);
-
-                        Toast.makeText(getApplicationContext(), "My Notes Clicked", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.nav_contrib:
                         if (!(getSupportFragmentManager().findFragmentById(R.id.container) instanceof ContributionsFragment)) {
@@ -88,17 +83,16 @@ public class MainActivity extends AppCompatActivity {
                         }
 
                         menuItem.setChecked(true);
-
-                        Toast.makeText(getApplicationContext(), "Contributions Clicked", Toast.LENGTH_SHORT).show();
                         break;
                     case R.id.nav_logout:
-                        menuItem.setChecked(false);
+                        FirebaseAuth.getInstance().signOut();
 
-                        Toast.makeText(getApplicationContext(), "Log Out Clicked", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                        finish();
+
                         break;
                     default:
                 }
-//                menuItem.setChecked(!menuItem.isChecked());
 
                 binding.drawerLayout.closeDrawers();
 

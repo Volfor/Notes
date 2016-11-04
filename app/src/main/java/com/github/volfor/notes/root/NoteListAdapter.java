@@ -1,4 +1,4 @@
-package com.github.volfor.notes.notes.list;
+package com.github.volfor.notes.root;
 
 import android.databinding.DataBindingUtil;
 import android.support.v7.widget.RecyclerView;

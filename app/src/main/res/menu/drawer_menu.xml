@@ -5,6 +5,7 @@
         android:checkableBehavior="single">
         <item
             android:id="@+id/nav_my_notes"
+            android:checked="true"
             android:icon="@android:drawable/ic_menu_agenda"
             android:title="My notes" />
         <item

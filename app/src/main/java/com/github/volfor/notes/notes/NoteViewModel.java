@@ -7,7 +7,7 @@ import android.view.View;
 import android.widget.Toast;
 
 import com.github.volfor.notes.BaseViewModel;
-import com.github.volfor.notes.ContributionsFragment;
+import com.github.volfor.notes.root.ContributionsFragment;
 import com.github.volfor.notes.model.Note;
 import com.github.volfor.notes.model.User;
 import com.google.firebase.database.DataSnapshot;

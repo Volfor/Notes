@@ -1,4 +1,4 @@
-package com.github.volfor.notes.notes.list;
+package com.github.volfor.notes.root;
 
 import android.content.Intent;
 import android.databinding.BaseObservable;
