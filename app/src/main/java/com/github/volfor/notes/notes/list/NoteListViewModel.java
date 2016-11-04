@@ -1,11 +1,14 @@
 package com.github.volfor.notes.notes.list;
 
 import android.content.Context;
+import android.content.Intent;
 import android.databinding.BindingAdapter;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.view.View;
 
 import com.github.volfor.notes.BaseViewModel;
+import com.github.volfor.notes.notes.create.CreateNoteActivity;
 import com.google.firebase.database.FirebaseDatabase;
 
 public class NoteListViewModel extends BaseViewModel {
@@ -20,6 +23,11 @@ public class NoteListViewModel extends BaseViewModel {
     @Override
     public void start(Context context) {
 
+    }
+
+    public void onCreateNoteClick(View v) {
+        Intent intent = new Intent(v.getContext(), CreateNoteActivity.class);
+        v.getContext().startActivity(intent);
     }
 
     @Override

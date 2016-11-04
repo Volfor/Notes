@@ -7,9 +7,9 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.widget.Toast;
 
-import com.github.volfor.notes.notes.list.NoteListActivity;
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.databinding.ActivityLoginBinding;
+import com.github.volfor.notes.root.MainActivity;
 
 public class LoginActivity extends AppCompatActivity implements LoginView {
 
@@ -54,12 +54,14 @@ public class LoginActivity extends AppCompatActivity implements LoginView {
 
     @Override
     public void hideProgressDialog() {
-        progressDialog.dismiss();
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
     }
 
     @Override
     public void startNoteListActivity() {
-        startActivity(new Intent(LoginActivity.this, NoteListActivity.class));
+        startActivity(new Intent(LoginActivity.this, MainActivity.class));
         finish();
     }
 

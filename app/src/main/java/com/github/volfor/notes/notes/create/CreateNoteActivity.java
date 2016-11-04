@@ -1,4 +1,4 @@
-package com.github.volfor.notes;
+package com.github.volfor.notes.notes.create;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -6,21 +6,23 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 
-import com.github.volfor.notes.databinding.ActivityMainBinding;
+import com.github.volfor.notes.R;
+import com.github.volfor.notes.databinding.ActivityCreateNoteBinding;
 import com.github.volfor.notes.model.Note;
+import com.github.volfor.notes.model.User;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
-public class MainActivity extends AppCompatActivity {
+public class CreateNoteActivity extends AppCompatActivity {
 
-    private ActivityMainBinding binding;
+    private ActivityCreateNoteBinding binding;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        binding = DataBindingUtil.setContentView(this, R.layout.activity_create_note);
 
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
@@ -34,10 +36,11 @@ public class MainActivity extends AppCompatActivity {
         binding.createNoteButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Note note = new Note(user.getUid(), user.getDisplayName(),
-                        binding.title.getText().toString(), binding.text.getText().toString());
+                String key = database.child("notes").push().getKey();
 
-                database.child("notes").push().setValue(note);
+                Note note = new Note(key, binding.title.getText().toString(), binding.text.getText().toString(), User.castToUser(user));
+
+                database.child("notes").child(key).setValue(note);
             }
         });
     }

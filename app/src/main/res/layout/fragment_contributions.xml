@@ -1,0 +1,7 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/shared_notes_list"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent" />
+</layout>

@@ -144,7 +144,7 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     }
 
     private void saveUser(String id, String name, String email) {
-        User user = new User(name, email);
+        User user = new User(id, name, email);
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
 

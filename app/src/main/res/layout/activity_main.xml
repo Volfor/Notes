@@ -1,60 +1,34 @@
-<layout xmlns:android="http://schemas.android.com/apk/res/android">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools">
 
-    <RelativeLayout
+    <android.support.v4.widget.DrawerLayout
+        android:id="@+id/drawer_layout"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-
-        <TextView
-            android:id="@+id/hello_text"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_centerHorizontal="true"
-            android:text="Hello!"
-            android:textSize="24sp" />
-
-        <TextView
-            android:id="@+id/email"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/hello_text"
-            android:layout_centerHorizontal="true"
-            android:layout_marginTop="14dp"
-            android:text="Email" />
-
-        <TextView
-            android:id="@+id/name"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/email"
-            android:layout_centerHorizontal="true"
-            android:text="Name" />
+        android:layout_height="match_parent"
+        tools:openDrawer="start">
 
         <LinearLayout
-            android:id="@+id/create_note_block"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/name"
-            android:layout_marginTop="24dp"
+            android:layout_height="match_parent"
             android:orientation="vertical">
 
-            <EditText
-                android:id="@+id/title"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Title" />
+            <include
+                android:id="@+id/include"
+                layout="@layout/toolbar" />
 
-            <EditText
-                android:id="@+id/text"
+            <FrameLayout
+                android:id="@+id/container"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:hint="Text" />
-
-            <Button
-                android:id="@+id/create_note_button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_gravity="center"
-                android:text="Create note" />
+                android:layout_height="match_parent" />
         </LinearLayout>
-    </RelativeLayout>
+
+        <android.support.design.widget.NavigationView
+            android:id="@+id/nav_view"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:layout_gravity="start"
+            android:fitsSystemWindows="true"
+            app:menu="@menu/drawer_menu" />
+    </android.support.v4.widget.DrawerLayout>
 </layout>
