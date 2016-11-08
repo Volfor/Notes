@@ -257,6 +257,7 @@ public class NoteViewModel extends BaseViewModel {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
                 seekTo(0);
+                isPlaying.set(false);
             }
         });
     }
