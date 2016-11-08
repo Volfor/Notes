@@ -1,15 +1,18 @@
 package com.github.volfor.notes.note;
 
 import android.content.ContentValues;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.databinding.ActivityNoteBinding;
@@ -67,6 +70,25 @@ public class NoteActivity extends AppCompatActivity {
                 break;
             case R.id.attach_audio:
                 pickAudio();
+                break;
+            case R.id.delete_note:
+                new AlertDialog.Builder(this)
+                        .setMessage(R.string.delete_note_message)
+                        .setPositiveButton(R.string.yes, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                viewModel.deleteNote();
+                                Toast.makeText(NoteActivity.this, R.string.deleted, Toast.LENGTH_SHORT).show();
+                                finish();
+                            }
+                        })
+                        .setNegativeButton(R.string.no, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                // do nothing
+                            }
+                        })
+                        .show();
                 break;
             default:
         }

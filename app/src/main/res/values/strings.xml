@@ -2,4 +2,12 @@
     <string name="app_name">Notes</string>
     <string name="drawer_open">drawer open</string>
     <string name="drawer_close">drawer close</string>
+
+    <string name="delete_note_message">Are you really want to delete this note?</string>
+    <string name="deleted">Deleted</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
+    <string name="audio_removed">Audio removed</string>
+
+
 </resources>

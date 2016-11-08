@@ -13,10 +13,12 @@ import android.net.Uri;
 import android.os.Handler;
 import android.os.SystemClock;
 import android.support.annotation.NonNull;
+import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
 
 import com.github.volfor.notes.BaseViewModel;
+import com.github.volfor.notes.R;
 import com.github.volfor.notes.model.Audio;
 import com.github.volfor.notes.model.Note;
 import com.google.android.gms.tasks.OnFailureListener;
@@ -221,12 +223,6 @@ public class NoteViewModel extends BaseViewModel {
         return adapter;
     }
 
-    public void removeAudio() {
-        stopPlayer();
-        playerBlockVisibility.set(false);
-        noteReference.child("audio").removeValue();
-    }
-
     private void initPlayer(Context context, Audio audio) {
         songName.set(audio.name);
 
@@ -319,6 +315,18 @@ public class NoteViewModel extends BaseViewModel {
 
             }
         };
+    }
+
+    public void removeAudio(View v) {
+        stopPlayer();
+        playerBlockVisibility.set(false);
+        noteReference.child("audio").removeValue();
+
+        Toast.makeText(v.getContext(), R.string.audio_removed, Toast.LENGTH_SHORT).show();
+    }
+
+    public void deleteNote() {
+        noteReference.removeValue();
     }
 
     @Override
