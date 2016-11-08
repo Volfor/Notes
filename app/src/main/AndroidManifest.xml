@@ -29,5 +29,8 @@
             android:name=".note.NoteActivity"
             android:label="Note" />
         <activity android:name=".image.ImageActivity" />
+        <activity
+            android:name=".info.InfoActivity"
+            android:label="Info" />
     </application>
 </manifest>

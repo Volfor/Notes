@@ -21,6 +21,7 @@ import com.github.volfor.notes.BaseViewModel;
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.model.Audio;
 import com.github.volfor.notes.model.Note;
+import com.github.volfor.notes.model.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.database.DataSnapshot;
@@ -117,7 +118,9 @@ public class NoteViewModel extends BaseViewModel {
                     text.set(note.get().text);
                 }
 
-                adapter.changeList(note.get().images);
+                if (adapter != null) {
+                    adapter.changeList(note.get().images);
+                }
 
                 if (note.get().audio != null) {
                     initPlayer(context, note.get().audio);
@@ -315,6 +318,10 @@ public class NoteViewModel extends BaseViewModel {
 
             }
         };
+    }
+
+    public void shareWithUser(User user) {
+        noteReference.child("contributors").child(user.id).setValue(user);
     }
 
     public void removeAudio(View v) {

@@ -4,7 +4,9 @@ import com.android.annotations.NonNull;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.Exclude;
 
-public class User {
+import java.io.Serializable;
+
+public class User implements Serializable {
 
     public String id;
     public String name;

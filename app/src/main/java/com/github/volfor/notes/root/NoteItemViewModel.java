@@ -19,6 +19,7 @@ public class NoteItemViewModel extends BaseObservable {
     public void onItemClick(View v) {
         Intent intent = new Intent(v.getContext(), NoteActivity.class);
         intent.putExtra("key", note.noteId);
+        intent.putExtra("author", note.author);
         v.getContext().startActivity(intent);
     }
 

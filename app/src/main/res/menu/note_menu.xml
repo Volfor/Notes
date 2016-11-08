@@ -19,6 +19,18 @@
         app:showAsAction="ifRoom" />
 
     <item
+        android:id="@+id/share_note"
+        android:icon="@android:drawable/ic_menu_share"
+        android:title="Share"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/note_info"
+        android:icon="@android:drawable/ic_dialog_info"
+        android:title="Info"
+        app:showAsAction="ifRoom" />
+
+    <item
         android:id="@+id/delete_note"
         android:icon="@android:drawable/ic_menu_delete"
         android:title="Delete"

@@ -10,12 +10,19 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
+import android.widget.AutoCompleteTextView;
 import android.widget.Toast;
 
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.databinding.ActivityNoteBinding;
+import com.github.volfor.notes.info.InfoActivity;
+import com.github.volfor.notes.model.User;
+import com.github.volfor.notes.sharing.UsersAutoCompleteAdapter;
 
 import static com.github.volfor.notes.note.NoteViewModel.CAMERA_REQUEST;
 import static com.github.volfor.notes.note.NoteViewModel.PICK_AUDIO;
@@ -25,6 +32,7 @@ public class NoteActivity extends AppCompatActivity {
 
     private ActivityNoteBinding binding;
     private NoteViewModel viewModel;
+
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -70,6 +78,39 @@ public class NoteActivity extends AppCompatActivity {
                 break;
             case R.id.attach_audio:
                 pickAudio();
+                break;
+            case R.id.share_note:
+                AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
+
+                LayoutInflater inflater = this.getLayoutInflater();
+                View dialogView = inflater.inflate(R.layout.share_alert_dialog, null);
+                dialogBuilder.setView(dialogView);
+                dialogBuilder.setTitle(R.string.share_text);
+
+                final AlertDialog alertDialog = dialogBuilder.create();
+                final AutoCompleteTextView autocomplete = (AutoCompleteTextView) dialogView.findViewById(R.id.autocomplete);
+
+                autocomplete.setAdapter(new UsersAutoCompleteAdapter(this));
+                autocomplete.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
+                        User user = (User) adapterView.getItemAtPosition(position);
+                        autocomplete.setText(user.name);
+                        viewModel.shareWithUser(user);
+
+                        alertDialog.dismiss();
+
+                        Toast.makeText(NoteActivity.this, R.string.shared, Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                alertDialog.show();
+                break;
+            case R.id.note_info:
+                Intent intent = new Intent(NoteActivity.this, InfoActivity.class);
+                intent.putExtra("key", getIntent().getStringExtra("key"));
+                intent.putExtra("author", getIntent().getSerializableExtra("author"));
+                startActivity(intent);
                 break;
             case R.id.delete_note:
                 new AlertDialog.Builder(this)

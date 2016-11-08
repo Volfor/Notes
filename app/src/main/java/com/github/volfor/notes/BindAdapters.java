@@ -27,11 +27,21 @@ public class BindAdapters {
                 .into(v);
     }
 
+    @BindingAdapter({"avatar"})
+    public static void bindUserAvatar(ImageView v, String image) {
+        Glide.with(v.getContext())
+                .load(image)
+                .error(R.drawable.user_avatar_placeholder)
+                .into(v);
+    }
+
     @BindingAdapter({"adapter"})
     public static void bindAdapter(RecyclerView v, RecyclerView.Adapter adapter) {
         v.setHasFixedSize(true);
         v.setLayoutManager(new LinearLayoutManager(v.getContext()));
         v.setAdapter(adapter);
+
+        adapter.notifyDataSetChanged();
     }
 
     @BindingAdapter({"noteImagesAdapter"})
