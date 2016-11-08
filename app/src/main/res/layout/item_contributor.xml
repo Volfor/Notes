@@ -3,8 +3,6 @@
 
     <data>
 
-        <import type="com.google.firebase.auth.FirebaseAuth" />
-
         <variable
             name="viewModel"
             type="com.github.volfor.notes.info.UserItemViewModel" />

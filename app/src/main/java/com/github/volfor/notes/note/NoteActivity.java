@@ -24,6 +24,7 @@ import com.github.volfor.notes.databinding.ActivityNoteBinding;
 import com.github.volfor.notes.info.InfoActivity;
 import com.github.volfor.notes.model.User;
 import com.github.volfor.notes.sharing.UsersAutoCompleteAdapter;
+import com.google.firebase.auth.FirebaseAuth;
 
 import static com.github.volfor.notes.note.NoteViewModel.CAMERA_REQUEST;
 import static com.github.volfor.notes.note.NoteViewModel.PICK_AUDIO;
@@ -63,6 +64,13 @@ public class NoteActivity extends AppCompatActivity implements NoteView {
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.note_menu, menu);
+
+        User author = (User) getIntent().getSerializableExtra("author");
+        if (!author.id.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+            menu.findItem(R.id.delete_note).setVisible(false);
+            menu.findItem(R.id.share_note).setVisible(false);
+        }
+
         return true;
     }
 

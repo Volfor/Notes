@@ -5,11 +5,11 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
 import android.view.MenuItem;
 import android.view.View;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
-import com.github.volfor.notes.BindAdapters;
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.databinding.ActivityInfoBinding;
 import com.github.volfor.notes.model.User;
@@ -63,7 +63,15 @@ public class InfoActivity extends AppCompatActivity {
         });
 
         adapter = new ContributorsAdapter(author.id, ref.child("contributors"));
-        BindAdapters.bindAdapter(binding.contributorsList, adapter);
+        binding.contributorsList.setHasFixedSize(true);
+        binding.contributorsList.setNestedScrollingEnabled(false);
+        binding.contributorsList.setLayoutManager(new LinearLayoutManager(binding.contributorsList.getContext()) {
+            @Override
+            public boolean canScrollVertically() {
+                return false;
+            }
+        });
+        binding.contributorsList.setAdapter(adapter);
     }
 
     @Override
