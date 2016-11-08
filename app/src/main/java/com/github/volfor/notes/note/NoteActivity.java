@@ -7,6 +7,7 @@ import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.Nullable;
+import android.support.annotation.StringRes;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
@@ -28,7 +29,7 @@ import static com.github.volfor.notes.note.NoteViewModel.CAMERA_REQUEST;
 import static com.github.volfor.notes.note.NoteViewModel.PICK_AUDIO;
 import static com.github.volfor.notes.note.NoteViewModel.PICK_IMAGE;
 
-public class NoteActivity extends AppCompatActivity {
+public class NoteActivity extends AppCompatActivity implements NoteView {
 
     private ActivityNoteBinding binding;
     private NoteViewModel viewModel;
@@ -39,7 +40,7 @@ public class NoteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_note);
 
-        viewModel = new NoteViewModel(getIntent().getStringExtra("key"));
+        viewModel = new NoteViewModel(this, getIntent().getStringExtra("key"));
         binding.setViewModel(viewModel);
 
         viewModel.start(this);
@@ -49,6 +50,7 @@ public class NoteActivity extends AppCompatActivity {
         ActionBar supportActionBar = getSupportActionBar();
         if (supportActionBar != null) {
             supportActionBar.setDisplayHomeAsUpEnabled(true);
+
         }
     }
 
@@ -68,6 +70,7 @@ public class NoteActivity extends AppCompatActivity {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
+                viewModel.saveNote();
                 onBackPressed();
                 break;
             case R.id.attach_photo:
@@ -160,6 +163,39 @@ public class NoteActivity extends AppCompatActivity {
         pickIntent.setType("audio/*");
 
         startActivityForResult(pickIntent, PICK_AUDIO);
+    }
+
+    @Override
+    public void showConflictDialog(String author, String changesPreview) {
+        new AlertDialog.Builder(this)
+                .setTitle(author + " made changes:")
+                .setMessage(changesPreview)
+                .setPositiveButton(R.string.apply, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        viewModel.applyChanges();
+                        Toast.makeText(NoteActivity.this, R.string.applied, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton(R.string.merge, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        viewModel.mergeChanges();
+                        Toast.makeText(NoteActivity.this, R.string.merged, Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNeutralButton(R.string.discard, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        // do nothing
+                    }
+                })
+                .show();
+    }
+
+    @Override
+    public void showInformer(@StringRes int resId) {
+        Toast.makeText(this, resId, Toast.LENGTH_SHORT).show();
     }
 
     @Override

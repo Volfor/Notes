@@ -1,13 +1,9 @@
 package com.github.volfor.notes.model;
 
-import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static android.R.attr.id;
 
 @IgnoreExtraProperties
 public class Note {
@@ -19,6 +15,7 @@ public class Note {
     public Map<String, User> contributors;
     public List<String> images;
     public Audio audio;
+    public LastChanges lastChanges;
 
     public Note() {
     }
@@ -28,17 +25,6 @@ public class Note {
         this.title = title;
         this.text = text;
         this.author = author;
-    }
-
-    @Exclude
-    public Map<String, Object> toMap() {
-        HashMap<String, Object> result = new HashMap<>();
-        result.put("noteId", id);
-        result.put("title", title);
-        result.put("text", text);
-        result.put("author", author);
-
-        return result;
     }
 
 }

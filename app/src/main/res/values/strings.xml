@@ -8,9 +8,16 @@
     <string name="yes">Yes</string>
     <string name="no">No</string>
     <string name="audio_removed">Audio removed</string>
+    <string name="search_users_hint">search users…</string>
     <string name="share_text">Select user to share with</string>
     <string name="shared">Shared</string>
     <string name="contributor_removed">Contributor removed</string>
+    <string name="saved">Saved</string>
+    <string name="apply">Apply</string>
+    <string name="applied">Applied</string>
+    <string name="merge">Merge</string>
+    <string name="merged">Merged</string>
+    <string name="discard">Discard</string>
 
 
 </resources>

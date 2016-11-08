@@ -32,15 +32,25 @@
                     android:orientation="vertical"
                     android:padding="16dp">
 
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="end"
+                        android:gravity="end"
+                        android:text="@{viewModel.lastChanges}"
+                        android:textSize="12sp"
+                        android:textStyle="italic"
+                        android:visibility="@{viewModel.lastChangesVisibility}" />
+
                     <android.support.v7.widget.AppCompatEditText
                         android:id="@+id/edit_title"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:hint="Title"
-                        android:maxLines="2"
-                        android:text="@{viewModel.note.title}"
+                        android:lines="1"
+                        android:text="@={viewModel.title}"
                         android:textColor="#DD000000"
-                        android:textSize="24sp" />
+                        android:textSize="20sp" />
 
                     <android.support.v7.widget.AppCompatEditText
                         android:id="@+id/edit_text"
@@ -117,11 +127,18 @@
                     </RelativeLayout>
                 </LinearLayout>
 
+                <ProgressBar
+                    android:id="@+id/player_loading_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:visibility="@{viewModel.playerLoading}" />
+
                 <android.support.v7.widget.RecyclerView
                     android:id="@+id/images_list"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="16dp"
                     bind:noteImagesAdapter="@{viewModel.imagesAdapter}" />
             </LinearLayout>
         </android.support.v4.widget.NestedScrollView>

@@ -4,14 +4,12 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.databinding.Bindable;
-import android.databinding.Observable;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.view.View;
 import android.widget.SeekBar;
@@ -20,10 +18,12 @@ import android.widget.Toast;
 import com.github.volfor.notes.BaseViewModel;
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.model.Audio;
+import com.github.volfor.notes.model.LastChanges;
 import com.github.volfor.notes.model.Note;
 import com.github.volfor.notes.model.User;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -36,11 +36,15 @@ import com.google.firebase.storage.UploadTask;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
@@ -53,10 +57,17 @@ public class NoteViewModel extends BaseViewModel {
     public static final int PICK_IMAGE = 1007;
     public static final int PICK_AUDIO = 1008;
 
-    public ObservableField<Note> note = new ObservableField<>(new Note());
+    public Note note;
+
+    public ObservableField<String> title = new ObservableField<>("");
     public ObservableField<String> text = new ObservableField<>("");
+    public ObservableField<String> lastChanges = new ObservableField<>("");
+    public ObservableBoolean lastChangesVisibility = new ObservableBoolean(false);
+
+    private boolean isFirstStart = true;
 
     public ObservableBoolean playerBlockVisibility = new ObservableBoolean(false);
+    public ObservableBoolean playerLoading = new ObservableBoolean(false);
     public ObservableInt duration = new ObservableInt();
     public ObservableInt elapsed = new ObservableInt();
     public ObservableField<String> songName = new ObservableField<>("Audio file");
@@ -73,20 +84,9 @@ public class NoteViewModel extends BaseViewModel {
     private List<String> images = new ArrayList<>();
     private NoteImagesAdapter adapter;
 
-    private long timeLastCalled;
-
-    private OnPropertyChangedCallback changeCallback = new OnPropertyChangedCallback() {
-        @Override
-        public void onPropertyChanged(Observable observable, int propertyId) {
-            if ((SystemClock.elapsedRealtime() - timeLastCalled) > 2000) {
-                noteReference.child("text").setValue(text.get());
-                timeLastCalled = SystemClock.elapsedRealtime();
-            }
-        }
-    };
+    private NoteView view;
 
     private Handler durationHandler = new Handler();
-
     private Runnable updateSeekBarTime = new Runnable() {
         public void run() {
             elapsed.set(player.getCurrentPosition());
@@ -94,7 +94,8 @@ public class NoteViewModel extends BaseViewModel {
         }
     };
 
-    public NoteViewModel(String noteId) {
+    public NoteViewModel(NoteView view, String noteId) {
+        this.view = view;
         noteReference = FirebaseDatabase.getInstance()
                 .getReference()
                 .child("notes")
@@ -103,27 +104,49 @@ public class NoteViewModel extends BaseViewModel {
 
     @Override
     public void start(final Context context) {
-        text.addOnPropertyChangedCallback(changeCallback);
-
         listener = new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                note.set(dataSnapshot.getValue(Note.class));
+                note = dataSnapshot.getValue(Note.class);
 
-                if (note.get() == null) {
+                if (note == null) {
                     return;
                 }
 
-                if (!note.get().text.equals(text.get())) {
-                    text.set(note.get().text);
+                if (isFirstStart) {
+                    title.set(note.title);
+                    text.set(note.text);
+
+                    if (note.lastChanges != null && note.lastChanges.time != 0 && note.lastChanges.authorName != null) {
+                        lastChanges.set(formLastChangesString(note.lastChanges.time, note.lastChanges.authorName));
+                        lastChangesVisibility.set(true);
+                    } else {
+                        lastChangesVisibility.set(false);
+                    }
+
+                    isFirstStart = false;
+                } else {
+                    if (note.lastChanges != null &&
+                            !note.lastChanges.authorId.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
+
+                        if (!note.title.equals(title.get()) || !note.text.equals(text.get())) {
+                            showConflictDialog();
+                            return;
+                        }
+                    }
+                }
+
+                if (note.images == null) {
+                    note.images = new ArrayList<>();
                 }
 
                 if (adapter != null) {
-                    adapter.changeList(note.get().images);
+                    adapter.changeList(note.images);
                 }
 
-                if (note.get().audio != null) {
-                    initPlayer(context, note.get().audio);
+
+                if (note.audio != null) {
+                    initPlayer(context, note.audio);
                 } else {
                     playerBlockVisibility.set(false);
                 }
@@ -155,6 +178,9 @@ public class NoteViewModel extends BaseViewModel {
 
                 ref = ref.child("images");
                 path = getRealPathFromUri(context, data.getData());
+
+                note.images.add(0, path);
+                adapter.changeList(note.images);
                 try {
                     stream = new FileInputStream(path);
                 } catch (FileNotFoundException e) {
@@ -165,6 +191,9 @@ public class NoteViewModel extends BaseViewModel {
             if (requestCode == CAMERA_REQUEST) {
                 ref = ref.child("images");
                 path = getRealPathFromUri(context, capturedImageUri);
+
+                note.images.add(0, path);
+                adapter.changeList(note.images);
                 try {
                     stream = new FileInputStream(new File(path));
                 } catch (FileNotFoundException e) {
@@ -181,8 +210,13 @@ public class NoteViewModel extends BaseViewModel {
                 ref = ref.child("audios");
                 path = getRealPathFromUri(context, data.getData());
 
-                noteReference.child("audio").child("local").setValue(data.getData().toString());
-                noteReference.child("audio").child("name").setValue(path.substring(path.lastIndexOf('/') + 1));
+                Audio audio = new Audio();
+                audio.local = data.getData().toString();
+                audio.name = path.substring(path.lastIndexOf('/') + 1);
+                noteReference.child("audio").setValue(audio);
+
+                initPlayer(context, audio);
+
                 try {
                     stream = new FileInputStream(path);
                 } catch (FileNotFoundException e) {
@@ -192,7 +226,7 @@ public class NoteViewModel extends BaseViewModel {
 
             if (stream != null) {
                 String filename = path.substring(path.lastIndexOf('/') + 1);
-                ref = ref.child(note.get().noteId).child(new Date().getTime() + "_" + filename);
+                ref = ref.child(note.noteId).child(new Date().getTime() + "_" + filename);
 
                 UploadTask uploadTask = ref.putStream(stream);
                 uploadTask.addOnFailureListener(new OnFailureListener() {
@@ -207,12 +241,25 @@ public class NoteViewModel extends BaseViewModel {
                         taskSnapshot.getStorage().getPath();
 
                         if (downloadUrl != null) {
+                            Map<String, Object> mediaMap = new HashMap<>();
                             if (requestCode == PICK_AUDIO) {
-                                noteReference.child("audio").child("remote").setValue(downloadUrl.toString());
+                                mediaMap.put("remote", downloadUrl.toString());
+                                noteReference.child("audio").updateChildren(mediaMap);
                             } else {
-                                images.add(0, downloadUrl.toString());
-                                noteReference.child("images").setValue(images);
+                                note.images.remove(0);
+                                note.images.add(0, downloadUrl.toString());
+                                adapter.changeList(note.images);
+                                mediaMap.put("images", note.images);
+
+                                noteReference.updateChildren(mediaMap);
                             }
+
+                            LastChanges changes = new LastChanges();
+                            changes.time = System.currentTimeMillis();
+                            changes.authorName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+                            changes.authorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+                            noteReference.child("lastChanges").setValue(changes);
                         }
                     }
                 });
@@ -229,36 +276,66 @@ public class NoteViewModel extends BaseViewModel {
     private void initPlayer(Context context, Audio audio) {
         songName.set(audio.name);
 
-        Uri uri = null;
-        if (audio.local != null && new File(audio.local).exists()) {
-            uri = new Uri.Builder().path(audio.local).build();
-        } else if (audio.remote != null) {
-            uri = Uri.parse(audio.remote);
-        }
-
-        if (uri == null || uri.equals(currentAudio)) {
-            playerBlockVisibility.set(false);
-            return;
-        }
-
-        currentAudio = uri;
-
-        if (player != null) {
-            player.release();
-        }
-
-        playerBlockVisibility.set(true);
-
-        player = MediaPlayer.create(context, uri);
-        duration.set(player.getDuration());
-
-        player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+        final MediaPlayer.OnCompletionListener onCompletionListener = new MediaPlayer.OnCompletionListener() {
             @Override
             public void onCompletion(MediaPlayer mediaPlayer) {
-                seekTo(0);
+                mediaPlayer.seekTo(0);
                 isPlaying.set(false);
             }
-        });
+        };
+
+        Uri local = null;
+        Uri remote = null;
+        if (audio.local != null && new File(getRealPathFromUri(context, Uri.parse(audio.local))).exists()) {
+            local = Uri.parse(audio.local);
+        } else if (audio.remote != null) {
+            remote = Uri.parse(audio.remote);
+        }
+
+        if (local != null) {
+            if (local.equals(currentAudio)) {
+                return;
+            }
+
+            player = MediaPlayer.create(context, local);
+            playerBlockVisibility.set(true);
+            isPlaying.set(false);
+
+            elapsed.set(0);
+            duration.set(player.getDuration());
+            player.setOnCompletionListener(onCompletionListener);
+
+            currentAudio = local;
+        } else if (remote != null) {
+            if (remote.equals(currentAudio)) {
+                return;
+            }
+
+            playerLoading.set(true);
+            player = new MediaPlayer();
+
+            try {
+                player.setDataSource(audio.remote);
+            } catch (IOException e) {
+                playerLoading.set(false);
+                Timber.e(e, e.getMessage());
+            }
+
+            player.prepareAsync();
+            player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    playerLoading.set(false);
+                    playerBlockVisibility.set(true);
+                    isPlaying.set(false);
+
+                    elapsed.set(0);
+                    duration.set(player.getDuration());
+                    player.setOnCompletionListener(onCompletionListener);
+                }
+            });
+            currentAudio = remote;
+        }
     }
 
     public void play() {
@@ -320,19 +397,83 @@ public class NoteViewModel extends BaseViewModel {
         };
     }
 
+    public void saveNote() {
+        if (!title.get().equals(note.title) || !text.get().equals(note.text)) {
+            Map<String, Object> noteMap = new HashMap<>();
+            noteMap.put("title", title.get());
+            noteMap.put("text", text.get());
+
+            LastChanges changes = new LastChanges();
+            changes.time = System.currentTimeMillis();
+            changes.authorName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+            changes.authorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+            noteMap.put("lastChanges", changes);
+            noteReference.updateChildren(noteMap);
+
+            view.showInformer(R.string.saved);
+        }
+    }
+
+    public void applyChanges() {
+        title.set(note.title);
+        text.set(note.text);
+    }
+
+    public void mergeChanges() {
+        if (!title.get().equals(note.title)) {
+            String mergedTitle = title.get() + "/" + note.title;
+            title.set(mergedTitle);
+        }
+
+        if (!text.get().equals(note.text)) {
+            String mergedText = text.get() + "\n<--- " + note.lastChanges.authorName + " changes --->" + "\n" + note.text;
+            text.set(mergedText);
+        }
+    }
+
     public void shareWithUser(User user) {
         noteReference.child("contributors").child(user.id).setValue(user);
+    }
+
+    private String formLastChangesString(long timeInMillis, String author) {
+        Date date = new Date();
+        date.setTime(timeInMillis);
+        String formattedDate = new SimpleDateFormat("MMM d, HH:mm", Locale.US).format(date);
+
+        return String.format("last changes at %s\nby %s", formattedDate, author);
+    }
+
+    private void showConflictDialog() {
+        String changes = "";
+        if (!title.get().equals(note.title)) {
+            changes = note.title;
+        }
+
+        if (!text.get().equals(note.text)) {
+            if (!changes.isEmpty()) {
+                changes += "\n\n" + note.text;
+            } else {
+                changes = note.text;
+            }
+        }
+
+        changes = changes.substring(0, Math.min(changes.length(), 100));
+
+        view.showConflictDialog(note.lastChanges.authorName, changes);
     }
 
     public void removeAudio(View v) {
         stopPlayer();
         playerBlockVisibility.set(false);
+        currentAudio = null;
+
         noteReference.child("audio").removeValue();
 
         Toast.makeText(v.getContext(), R.string.audio_removed, Toast.LENGTH_SHORT).show();
     }
 
-    public void deleteNote() {
+    public void deleteNote() { //TODO only admin can
         noteReference.removeValue();
     }
 

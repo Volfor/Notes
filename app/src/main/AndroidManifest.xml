@@ -27,8 +27,10 @@
             android:label="Create note" />
         <activity
             android:name=".note.NoteActivity"
-            android:label="Note" />
-        <activity android:name=".image.ImageActivity" />
+            android:label="" />
+        <activity
+            android:name=".image.ImageActivity"
+            android:label="" />
         <activity
             android:name=".info.InfoActivity"
             android:label="Info" />
