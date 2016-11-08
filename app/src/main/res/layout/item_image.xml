@@ -1,0 +1,19 @@
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:bind="http://schemas.android.com/apk/res-auto">
+
+    <data>
+
+        <variable
+            name="viewModel"
+            type="com.github.volfor.notes.note.ImageItemViewModel" />
+    </data>
+
+    <ImageView
+        android:id="@+id/image"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:onClick="@{(v) -> viewModel.onItemClick(v)}"
+        android:padding="0.3dp"
+        android:scaleType="centerCrop"
+        bind:imageUrl="@{viewModel.image}" />
+</layout>

@@ -34,6 +34,8 @@ public class MainActivity extends AppCompatActivity {
         if (user == null) {
             startActivity(new Intent(MainActivity.this, LoginActivity.class));
             finish();
+
+            return;
         }
 
         binding = DataBindingUtil.setContentView(this, R.layout.activity_main);

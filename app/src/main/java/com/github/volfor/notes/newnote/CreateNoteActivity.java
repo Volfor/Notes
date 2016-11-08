@@ -1,4 +1,4 @@
-package com.github.volfor.notes.notes.create;
+package com.github.volfor.notes.newnote;
 
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
@@ -26,11 +26,6 @@ public class CreateNoteActivity extends AppCompatActivity {
 
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        if (user != null) {
-            binding.email.setText(user.getEmail());
-            binding.name.setText(user.getDisplayName());
-        }
-
         final DatabaseReference database = FirebaseDatabase.getInstance().getReference();
 
         binding.createNoteButton.setOnClickListener(new View.OnClickListener() {
@@ -41,6 +36,8 @@ public class CreateNoteActivity extends AppCompatActivity {
                 Note note = new Note(key, binding.title.getText().toString(), binding.text.getText().toString(), User.castToUser(user));
 
                 database.child("notes").child(key).setValue(note);
+
+                finish();
             }
         });
     }

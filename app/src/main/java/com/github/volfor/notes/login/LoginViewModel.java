@@ -67,7 +67,7 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
                     // User is signed in
                     Timber.d("onAuthStateChanged:signed_in:%s", user.getUid());
 
-                    saveUser(user.getUid(), user.getDisplayName(), user.getEmail());
+                    saveUser(user);
 
                     view.startNoteListActivity();
                 } else {
@@ -143,12 +143,12 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
                 });
     }
 
-    private void saveUser(String id, String name, String email) {
-        User user = new User(id, name, email);
+    private void saveUser(FirebaseUser firebaseUser) {
+        User user = User.castToUser(firebaseUser);
 
         DatabaseReference database = FirebaseDatabase.getInstance().getReference();
 
-        database.child("users").child(id).setValue(user);
+        database.child("users").child(user.id).setValue(user);
     }
 
     @BindingAdapter({"onSignInClick"})

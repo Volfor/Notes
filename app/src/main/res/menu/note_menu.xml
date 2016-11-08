@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
+    <item
+        android:id="@+id/attach_photo"
+        android:icon="@android:drawable/ic_menu_camera"
+        android:title="Attach photo"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/attach_image"
+        android:icon="@android:drawable/ic_menu_gallery"
+        android:title="Attach image"
+        app:showAsAction="ifRoom" />
+
+    <item
+        android:id="@+id/attach_audio"
+        android:icon="@android:drawable/ic_lock_silent_mode_off"
+        android:title="Attach audio"
+        app:showAsAction="ifRoom" />
+</menu>

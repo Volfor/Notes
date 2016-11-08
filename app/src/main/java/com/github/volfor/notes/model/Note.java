@@ -4,6 +4,7 @@ import com.google.firebase.database.Exclude;
 import com.google.firebase.database.IgnoreExtraProperties;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import static android.R.attr.id;
@@ -16,6 +17,8 @@ public class Note {
     public String text;
     public User author;
     public Map<String, User> contributors;
+    public List<String> images;
+    public Audio audio;
 
     public Note() {
     }
@@ -25,14 +28,6 @@ public class Note {
         this.title = title;
         this.text = text;
         this.author = author;
-    }
-
-    public Note(String noteId, String title, String text, User author, Map<String, User> contributors) {
-        this.noteId = noteId;
-        this.title = title;
-        this.text = text;
-        this.author = author;
-        this.contributors = contributors;
     }
 
     @Exclude

@@ -4,10 +4,9 @@ import android.content.Intent;
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
 import android.view.View;
-import android.widget.Toast;
 
 import com.github.volfor.notes.model.Note;
-import com.github.volfor.notes.notes.NoteActivity;
+import com.github.volfor.notes.note.NoteActivity;
 
 public class NoteItemViewModel extends BaseObservable {
 
@@ -21,7 +20,6 @@ public class NoteItemViewModel extends BaseObservable {
         Intent intent = new Intent(v.getContext(), NoteActivity.class);
         intent.putExtra("key", note.noteId);
         v.getContext().startActivity(intent);
-        Toast.makeText(v.getContext(), "Item " + note.title + " clicked", Toast.LENGTH_SHORT).show();
     }
 
     @Bindable

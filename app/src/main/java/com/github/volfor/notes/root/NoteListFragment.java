@@ -11,8 +11,11 @@ import android.view.ViewGroup;
 
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.databinding.FragmentNoteListBinding;
-import com.github.volfor.notes.notes.create.CreateNoteActivity;
+import com.github.volfor.notes.newnote.CreateNoteActivity;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 
 public class NoteListFragment extends Fragment {
 
@@ -34,7 +37,15 @@ public class NoteListFragment extends Fragment {
     }
 
     public NoteListAdapter getAdapter() {
-        adapter = new NoteListAdapter(FirebaseDatabase.getInstance().getReference().child("notes"));
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+
+        Query query = FirebaseDatabase.getInstance()
+                .getReference()
+                .child("notes")
+                .orderByChild("author/id")
+                .equalTo(user.getUid());
+
+        adapter = new NoteListAdapter(query);
         return adapter;
     }
 
