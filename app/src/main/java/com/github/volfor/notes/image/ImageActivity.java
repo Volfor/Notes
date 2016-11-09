@@ -64,7 +64,6 @@ public class ImageActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 setActionBarTitle(position);
-                //todo delete image
                 currentPosition = position;
             }
 

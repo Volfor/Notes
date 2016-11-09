@@ -151,6 +151,7 @@ public class NoteActivity extends AppCompatActivity implements NoteView {
     @Override
     public void onBackPressed() {
         viewModel.onBackPressed();
+        super.onBackPressed();
     }
 
     private void capturePhoto() {

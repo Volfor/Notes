@@ -11,7 +11,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
-import android.text.TextUtils;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -408,11 +407,6 @@ public class NoteViewModel extends BaseViewModel {
     }
 
     public void onBackPressed() {
-        if (TextUtils.isEmpty(title.get())) {
-
-            return;
-        }
-
         if (!title.get().equals(note.title) || !text.get().equals(note.text)) {
             Map<String, Object> noteMap = new HashMap<>();
             noteMap.put("title", title.get());
@@ -428,8 +422,6 @@ public class NoteViewModel extends BaseViewModel {
 
             view.showInformer(R.string.saved);
         }
-
-        view.finish();
     }
 
     public void applyChanges() {
@@ -490,7 +482,7 @@ public class NoteViewModel extends BaseViewModel {
         Toast.makeText(v.getContext(), R.string.audio_removed, Toast.LENGTH_SHORT).show();
     }
 
-    public void deleteNote() { //TODO only admin can
+    public void deleteNote() {
         noteReference.removeValue();
     }
 
