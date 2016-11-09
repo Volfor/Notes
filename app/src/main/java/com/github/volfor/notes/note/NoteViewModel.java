@@ -409,8 +409,8 @@ public class NoteViewModel extends BaseViewModel {
     public void onBackPressed() {
         if (!title.get().equals(note.title) || !text.get().equals(note.text)) {
             Map<String, Object> noteMap = new HashMap<>();
-            noteMap.put("title", title.get());
-            noteMap.put("text", text.get());
+            noteMap.put("title", title.get().trim());
+            noteMap.put("text", text.get().trim());
 
             LastChanges changes = new LastChanges();
             changes.time = System.currentTimeMillis();
