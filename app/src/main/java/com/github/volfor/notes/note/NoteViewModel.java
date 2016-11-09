@@ -424,7 +424,7 @@ public class NoteViewModel extends BaseViewModel {
 
     public void saveNote() {
         if (TextUtils.isEmpty(title.get()) && TextUtils.isEmpty(text.get())) {
-            if (note.images.isEmpty() && note.audio == null) {
+            if ((note.images == null || note.images.isEmpty()) && note.audio == null) {
                 noteReference.removeValue();
                 return;
             }

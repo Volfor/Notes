@@ -21,7 +21,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class UsersAutoCompleteAdapter extends BaseAdapter implements Filterable {
 
@@ -38,29 +37,8 @@ public class UsersAutoCompleteAdapter extends BaseAdapter implements Filterable 
         ref.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Map<String, Map<String, String>> usersMap = (Map<String, Map<String, String>>) dataSnapshot.getValue();
-
-                for (Map.Entry<String, Map<String, String>> entry : usersMap.entrySet()) {
-                    Map<String, String> userValue = entry.getValue();
-
-                    User user = new User();
-                    for (Map.Entry<String, String> userInfo : userValue.entrySet()) {
-                        if (userInfo.getKey().equals("id")) {
-                            user.id = userInfo.getValue();
-                        }
-
-                        if (userInfo.getKey().equals("name")) {
-                            user.name = userInfo.getValue();
-                        }
-
-                        if (userInfo.getKey().equals("email")) {
-                            user.email = userInfo.getValue();
-                        }
-
-                        if (userInfo.getKey().equals("avatar")) {
-                            user.avatar = userInfo.getValue();
-                        }
-                    }
+                for (DataSnapshot entry : dataSnapshot.getChildren()) {
+                    User user = entry.getValue(User.class);
 
                     if (!user.id.equals(FirebaseAuth.getInstance().getCurrentUser().getUid())) {
                         users.add(user);
@@ -109,10 +87,6 @@ public class UsersAutoCompleteAdapter extends BaseAdapter implements Filterable 
                 if (constraint != null) {
                     List<User> filtered = new ArrayList<>();
                     for (User user : users) {
-//                        if (user.name.toLowerCase().startsWith(constraint.toString().toLowerCase())
-//                                || user.email.toLowerCase().startsWith(constraint.toString().toLowerCase())) {
-//                            filtered.add(user);
-//                        }
                         if (user.name.toLowerCase().contains(constraint.toString().toLowerCase())
                                 || user.email.toLowerCase().contains(constraint.toString().toLowerCase())) {
                             filtered.add(user);
