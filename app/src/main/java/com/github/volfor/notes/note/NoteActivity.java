@@ -29,6 +29,7 @@ import com.google.firebase.auth.FirebaseAuth;
 import static com.github.volfor.notes.note.NoteViewModel.CAMERA_REQUEST;
 import static com.github.volfor.notes.note.NoteViewModel.PICK_AUDIO;
 import static com.github.volfor.notes.note.NoteViewModel.PICK_IMAGE;
+import static com.github.volfor.notes.note.NoteViewModel.REQUEST_FINISH;
 
 public class NoteActivity extends AppCompatActivity implements NoteView {
 
@@ -78,7 +79,6 @@ public class NoteActivity extends AppCompatActivity implements NoteView {
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
-                viewModel.saveNote();
                 onBackPressed();
                 break;
             case R.id.attach_photo:
@@ -121,7 +121,7 @@ public class NoteActivity extends AppCompatActivity implements NoteView {
                 Intent intent = new Intent(NoteActivity.this, InfoActivity.class);
                 intent.putExtra("key", getIntent().getStringExtra("key"));
                 intent.putExtra("author", getIntent().getSerializableExtra("author"));
-                startActivity(intent);
+                startActivityForResult(intent, REQUEST_FINISH);
                 break;
             case R.id.delete_note:
                 new AlertDialog.Builder(this)
@@ -146,6 +146,11 @@ public class NoteActivity extends AppCompatActivity implements NoteView {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Override
+    public void onBackPressed() {
+        viewModel.onBackPressed();
     }
 
     private void capturePhoto() {

@@ -11,16 +11,25 @@ import android.view.ViewGroup;
 
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.databinding.FragmentNoteListBinding;
-import com.github.volfor.notes.newnote.CreateNoteActivity;
+import com.github.volfor.notes.model.Note;
+import com.github.volfor.notes.model.User;
+import com.github.volfor.notes.note.NoteActivity;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 public class NoteListFragment extends Fragment {
 
     private FragmentNoteListBinding binding;
     private NoteListAdapter adapter;
+
+    private Query query;
+    private ValueEventListener listener;
 
     @Nullable
     @Override
@@ -28,23 +37,55 @@ public class NoteListFragment extends Fragment {
         binding = DataBindingUtil.inflate(inflater, R.layout.fragment_note_list, container, false);
         binding.setViewModel(this);
 
-        return binding.getRoot();
-    }
-
-    public void onCreateNoteClick(View v) {
-        Intent intent = new Intent(v.getContext(), CreateNoteActivity.class);
-        v.getContext().startActivity(intent);
-    }
-
-    public NoteListAdapter getAdapter() {
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        Query query = FirebaseDatabase.getInstance()
+        query = FirebaseDatabase.getInstance()
                 .getReference()
                 .child("notes")
                 .orderByChild("author/id")
                 .equalTo(user.getUid());
 
+        listener = new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                if (dataSnapshot.getValue() == null || dataSnapshot.getChildrenCount() == 0) {
+                    binding.notesList.setVisibility(View.GONE);
+                    binding.include.emptyView.setVisibility(View.VISIBLE);
+                } else {
+                    binding.include.emptyView.setVisibility(View.GONE);
+                    binding.notesList.setVisibility(View.VISIBLE);
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        };
+
+        query.addValueEventListener(listener);
+
+        return binding.getRoot();
+    }
+
+    public void onCreateNoteClick(View v) {
+        DatabaseReference database = FirebaseDatabase.getInstance().getReference();
+
+        String key = database.child("notes").push().getKey();
+
+        Note note = new Note();
+        note.noteId = key;
+        note.author = User.castToUser(FirebaseAuth.getInstance().getCurrentUser());
+
+        database.child("notes").child(key).setValue(note);
+
+        Intent intent = new Intent(v.getContext(), NoteActivity.class);
+        intent.putExtra("key", note.noteId);
+        intent.putExtra("author", note.author);
+        v.getContext().startActivity(intent);
+    }
+
+    public NoteListAdapter getAdapter() {
         adapter = new NoteListAdapter(query);
         return adapter;
     }
@@ -56,6 +97,8 @@ public class NoteListFragment extends Fragment {
         if (adapter != null) {
             adapter.cleanup();
         }
+
+        query.removeEventListener(listener);
     }
 
 }

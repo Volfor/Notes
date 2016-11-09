@@ -12,10 +12,12 @@ import java.util.List;
 
 public class ImageItemViewModel extends BaseObservable {
 
+    private String noteId;
     private List<String> images;
     private int position;
 
-    public ImageItemViewModel(List<String> images, int position) {
+    public ImageItemViewModel(String noteId, List<String> images, int position) {
+        this.noteId = noteId;
         this.images = images;
         this.position = position;
     }
@@ -28,6 +30,7 @@ public class ImageItemViewModel extends BaseObservable {
     public void onItemClick(View v) {
         Intent intent = new Intent(v.getContext(), ImageActivity.class);
         intent.putStringArrayListExtra("images", (ArrayList<String>) images);
+        intent.putExtra("noteId", noteId);
         intent.putExtra("position", position);
         v.getContext().startActivity(intent);
     }

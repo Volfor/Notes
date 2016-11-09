@@ -6,19 +6,19 @@
         <item
             android:id="@+id/nav_my_notes"
             android:checked="true"
-            android:icon="@android:drawable/ic_menu_agenda"
-            android:title="My notes" />
+            android:icon="@drawable/ic_book_black_24dp"
+            android:title="@string/my_notes" />
         <item
             android:id="@+id/nav_contrib"
-            android:icon="@android:drawable/ic_menu_compass"
-            android:title="Contributions" />
+            android:icon="@drawable/ic_collections_bookmark_black_24dp"
+            android:title="@string/contributions" />
     </group>
     <group
         android:id="@+id/menu_bottom"
         android:checkableBehavior="none">
         <item
             android:id="@+id/nav_logout"
-            android:icon="@android:drawable/ic_menu_revert"
-            android:title="Log out" />
+            android:icon="@drawable/ic_exit_to_app_black_24dp"
+            android:title="@string/log_out" />
     </group>
 </menu>

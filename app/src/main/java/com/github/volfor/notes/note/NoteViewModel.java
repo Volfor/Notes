@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -57,6 +58,8 @@ public class NoteViewModel extends BaseViewModel {
     public static final int PICK_IMAGE = 1007;
     public static final int PICK_AUDIO = 1008;
 
+    public static final int REQUEST_FINISH = 1010;
+
     public Note note;
 
     public ObservableField<String> title = new ObservableField<>("");
@@ -81,6 +84,7 @@ public class NoteViewModel extends BaseViewModel {
     private DatabaseReference noteReference;
     private ValueEventListener listener;
 
+    private String noteId;
     private List<String> images = new ArrayList<>();
     private NoteImagesAdapter adapter;
 
@@ -96,6 +100,7 @@ public class NoteViewModel extends BaseViewModel {
 
     public NoteViewModel(NoteView view, String noteId) {
         this.view = view;
+        this.noteId = noteId;
         noteReference = FirebaseDatabase.getInstance()
                 .getReference()
                 .child("notes")
@@ -114,8 +119,8 @@ public class NoteViewModel extends BaseViewModel {
                 }
 
                 if (isFirstStart) {
-                    title.set(note.title);
-                    text.set(note.text);
+                    title.set(note.title == null ? "" : note.title);
+                    text.set(note.text == null ? "" : note.text);
 
                     if (note.lastChanges != null && note.lastChanges.time != 0 && note.lastChanges.authorName != null) {
                         lastChanges.set(formLastChangesString(note.lastChanges.time, note.lastChanges.authorName));
@@ -166,6 +171,11 @@ public class NoteViewModel extends BaseViewModel {
 
     public void onActivityResult(Context context, final int requestCode, int resultCode, Intent data) {
         if (resultCode == Activity.RESULT_OK) {
+            if (requestCode == REQUEST_FINISH) {
+                view.finish();
+                return;
+            }
+
             String path = "";
             InputStream stream = null;
             StorageReference ref = FirebaseStorage.getInstance().getReference();
@@ -269,7 +279,7 @@ public class NoteViewModel extends BaseViewModel {
 
     @Bindable
     public NoteImagesAdapter getImagesAdapter() {
-        adapter = new NoteImagesAdapter(images);
+        adapter = new NoteImagesAdapter(noteId, images);
         return adapter;
     }
 
@@ -397,7 +407,12 @@ public class NoteViewModel extends BaseViewModel {
         };
     }
 
-    public void saveNote() {
+    public void onBackPressed() {
+        if (TextUtils.isEmpty(title.get())) {
+
+            return;
+        }
+
         if (!title.get().equals(note.title) || !text.get().equals(note.text)) {
             Map<String, Object> noteMap = new HashMap<>();
             noteMap.put("title", title.get());
@@ -413,6 +428,8 @@ public class NoteViewModel extends BaseViewModel {
 
             view.showInformer(R.string.saved);
         }
+
+        view.finish();
     }
 
     public void applyChanges() {

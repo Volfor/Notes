@@ -23,9 +23,6 @@
             android:name=".login.LoginActivity"
             android:label="Login" />
         <activity
-            android:name=".newnote.CreateNoteActivity"
-            android:label="Create note" />
-        <activity
             android:name=".note.NoteActivity"
             android:label="" />
         <activity

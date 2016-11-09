@@ -66,7 +66,7 @@ public class BindAdapters {
     public static void bindImageUrl(ImageView v, String url) {
         Glide.with(v.getContext())
                 .load(url)
-                //TODO .error and .placeholder
+                .placeholder(R.drawable.image_placeholder)
                 .into(v);
     }
 

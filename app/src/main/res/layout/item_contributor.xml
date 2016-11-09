@@ -53,6 +53,6 @@
             android:padding="8dp"
             android:src="@android:drawable/ic_menu_close_clear_cancel"
             android:tint="@android:color/holo_red_dark"
-            android:visibility="@{viewModel.iAmAuthor}" />
+            android:visibility="@{viewModel.iAmAuthor || viewModel.iAmContributor}" />
     </RelativeLayout>
 </layout>

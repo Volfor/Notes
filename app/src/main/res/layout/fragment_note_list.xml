@@ -12,17 +12,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <LinearLayout
+        <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical">
+            android:layout_height="match_parent">
+
+            <include
+                android:id="@+id/include"
+                layout="@layout/empty_view" />
 
             <android.support.v7.widget.RecyclerView
                 android:id="@+id/notes_list"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 bind:adapter="@{viewModel.adapter}" />
-        </LinearLayout>
+        </FrameLayout>
 
         <android.support.design.widget.FloatingActionButton
             android:id="@+id/fab_create_note"
@@ -31,6 +34,6 @@
             android:layout_gravity="bottom|end"
             android:layout_margin="16dp"
             android:onClick="@{(v) -> viewModel.onCreateNoteClick(v)}"
-            android:src="@android:drawable/ic_menu_edit" />
+            android:src="@drawable/ic_mode_edit_white_24dp" />
     </android.support.design.widget.CoordinatorLayout>
 </layout>

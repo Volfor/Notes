@@ -19,7 +19,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-public class InfoActivity extends AppCompatActivity {
+public class InfoActivity extends AppCompatActivity implements InfoView {
 
     private ActivityInfoBinding binding;
     private FirebaseRecyclerAdapter adapter;
@@ -62,7 +62,7 @@ public class InfoActivity extends AppCompatActivity {
             }
         });
 
-        adapter = new ContributorsAdapter(author.id, ref.child("contributors"));
+        adapter = new ContributorsAdapter(this, author.id, ref.child("contributors"));
         binding.contributorsList.setHasFixedSize(true);
         binding.contributorsList.setNestedScrollingEnabled(false);
         binding.contributorsList.setLayoutManager(new LinearLayoutManager(binding.contributorsList.getContext()) {

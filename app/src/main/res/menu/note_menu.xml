@@ -2,37 +2,37 @@
     xmlns:app="http://schemas.android.com/apk/res-auto">
     <item
         android:id="@+id/attach_photo"
-        android:icon="@android:drawable/ic_menu_camera"
-        android:title="Attach photo"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_photo_camera_white_24dp"
+        android:title="@string/attach_photo"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/attach_image"
-        android:icon="@android:drawable/ic_menu_gallery"
-        android:title="Attach image"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_photo_white_24dp"
+        android:title="@string/attach_image"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/attach_audio"
-        android:icon="@android:drawable/ic_lock_silent_mode_off"
-        android:title="Attach audio"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_audiotrack_white_24dp"
+        android:title="@string/attach_audio"
+        app:showAsAction="always" />
 
     <item
         android:id="@+id/share_note"
-        android:icon="@android:drawable/ic_menu_share"
-        android:title="Share"
+        android:icon="@drawable/ic_share_white_24dp"
+        android:title="@string/share"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/note_info"
-        android:icon="@android:drawable/ic_dialog_info"
-        android:title="Info"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_info_outline_white_24dp"
+        android:title="@string/info"
+        app:showAsAction="never" />
 
     <item
         android:id="@+id/delete_note"
-        android:icon="@android:drawable/ic_menu_delete"
-        android:title="Delete"
-        app:showAsAction="ifRoom" />
+        android:icon="@drawable/ic_delete_white_24dp"
+        android:title="@string/delete"
+        app:showAsAction="never" />
 </menu>

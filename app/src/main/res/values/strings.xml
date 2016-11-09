@@ -18,6 +18,19 @@
     <string name="merge">Merge</string>
     <string name="merged">Merged</string>
     <string name="discard">Discard</string>
-
-
+    <string name="empty_list">This list is empty</string>
+    <string name="empty_text">Nothing here</string>
+    <string name="create_new_note_text">You can create a new note</string>
+    <string name="my_notes">My notes</string>
+    <string name="contributions">Contributions</string>
+    <string name="log_out">Log out</string>
+    <string name="delete">Delete</string>
+    <string name="info">Info</string>
+    <string name="share">Share</string>
+    <string name="attach_audio">Attach audio</string>
+    <string name="attach_image">Attach image</string>
+    <string name="attach_photo">Attach photo</string>
+    <string name="empty_title_warning">Title can\'t be empty</string>
+    <string name="empty_text_warning">Text can\'t be empty</string>
+    <string name="image_deleted">Image deleted</string>
 </resources>

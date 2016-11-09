@@ -29,7 +29,7 @@ public class ImagesPagerAdapter extends PagerAdapter {
 
         Glide.with(binding.imageFullscreen.getContext())
                 .load(images.get(position))
-//                .error(R.drawable.image_loading) TODO
+                .placeholder(R.drawable.image_placeholder)
                 .into(binding.imageFullscreen);
 
         container.addView(binding.getRoot());

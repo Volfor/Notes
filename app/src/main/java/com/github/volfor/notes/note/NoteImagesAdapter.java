@@ -14,9 +14,11 @@ import java.util.List;
 
 public class NoteImagesAdapter extends RecyclerView.Adapter<NoteImagesAdapter.ViewHolder> {
 
+    private String noteId;
     private List<String> images;
 
-    public NoteImagesAdapter(List<String> images) {
+    public NoteImagesAdapter(String noteId, List<String> images) {
+        this.noteId = noteId;
         this.images = images;
     }
 
@@ -29,7 +31,7 @@ public class NoteImagesAdapter extends RecyclerView.Adapter<NoteImagesAdapter.Vi
 
     @Override
     public void onBindViewHolder(ViewHolder holder, int position) {
-        holder.bindImage(images, position);
+        holder.bindImage(noteId, images, position);
     }
 
     @Override
@@ -53,8 +55,8 @@ public class NoteImagesAdapter extends RecyclerView.Adapter<NoteImagesAdapter.Vi
             binding.image.setLayoutParams(Utils.getNoteImageParams(v.getContext()));
         }
 
-        void bindImage(List<String> images, int position) {
-            binding.setViewModel(new ImageItemViewModel(images, position));
+        void bindImage(String noteId, List<String> images, int position) {
+            binding.setViewModel(new ImageItemViewModel(noteId, images, position));
         }
     }
 

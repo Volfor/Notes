@@ -7,4 +7,6 @@ public interface NoteView {
     void showConflictDialog(String author, String changesPreview);
 
     void showInformer(@StringRes int resId);
+
+    void finish();
 }

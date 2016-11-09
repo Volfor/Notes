@@ -6,10 +6,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.databinding.ActivityImageBinding;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -18,8 +21,10 @@ public class ImageActivity extends AppCompatActivity {
 
     private ActivityImageBinding binding;
 
+    private String noteId;
     private ArrayList<String> images;
     private int position;
+    private int currentPosition;
 
     private ActionBar supportActionBar;
 
@@ -30,6 +35,7 @@ public class ImageActivity extends AppCompatActivity {
 
         Bundle extras = getIntent().getExtras();
         if (extras != null) {
+            noteId = extras.getString("noteId");
             position = extras.getInt("position");
             images = extras.getStringArrayList("images");
         }
@@ -58,6 +64,8 @@ public class ImageActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 setActionBarTitle(position);
+                //todo delete image
+                currentPosition = position;
             }
 
             @Override
@@ -75,15 +83,38 @@ public class ImageActivity extends AppCompatActivity {
     }
 
     @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.image_menu, menu);
+        return true;
+    }
+
+    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case android.R.id.home:
                 onBackPressed();
                 break;
+            case R.id.delete_image:
+                deleteImage(currentPosition);
+                break;
             default:
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void deleteImage(int position) {
+        images.remove(position);
+
+        FirebaseDatabase.getInstance()
+                .getReference()
+                .child("notes")
+                .child(noteId)
+                .child("images")
+                .setValue(images);
+
+        Toast.makeText(this, R.string.image_deleted, Toast.LENGTH_SHORT).show();
+        finish();
     }
 
 }

@@ -8,9 +8,18 @@
             type="com.github.volfor.notes.root.ContributionsFragment" />
     </data>
 
-    <android.support.v7.widget.RecyclerView
-        android:id="@+id/shared_notes_list"
+    <FrameLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        bind:adapter="@{viewModel.adapter}" />
+        android:layout_height="match_parent">
+
+        <include
+            android:id="@+id/include"
+            layout="@layout/empty_view" />
+
+        <android.support.v7.widget.RecyclerView
+            android:id="@+id/shared_notes_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            bind:adapter="@{viewModel.adapter}" />
+    </FrameLayout>
 </layout>

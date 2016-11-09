@@ -13,17 +13,13 @@ import com.google.firebase.database.Query;
 
 public class ContributorsAdapter extends FirebaseRecyclerAdapter<User, ContributorsAdapter.ViewHolder> {
 
+    private InfoView view;
     private Query ref;
     private String authorId;
 
-    public ContributorsAdapter(String authorId, Query ref) {
+    public ContributorsAdapter(InfoView view, String authorId, DatabaseReference ref) {
         super(User.class, R.layout.item_contributor, ViewHolder.class, ref);
-        this.ref = ref;
-        this.authorId = authorId;
-    }
-
-    public ContributorsAdapter(String authorId, DatabaseReference ref) {
-        super(User.class, R.layout.item_contributor, ViewHolder.class, ref);
+        this.view = view;
         this.ref = ref;
         this.authorId = authorId;
     }
@@ -37,14 +33,14 @@ public class ContributorsAdapter extends FirebaseRecyclerAdapter<User, Contribut
             binding = DataBindingUtil.bind(v);
         }
 
-        void bindContributor(Query ref, User user, String authorId) {
-            binding.setViewModel(new UserItemViewModel(ref, user, authorId));
+        void bindContributor(InfoView view, Query ref, User user, String authorId) {
+            binding.setViewModel(new UserItemViewModel(view, ref, user, authorId));
         }
     }
 
     @Override
     protected void populateViewHolder(ViewHolder holder, User model, int position) {
-        holder.bindContributor(ref, model, authorId);
+        holder.bindContributor(view, ref, model, authorId);
     }
 
 }
