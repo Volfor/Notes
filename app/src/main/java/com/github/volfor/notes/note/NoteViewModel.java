@@ -435,8 +435,6 @@ public class NoteViewModel extends BaseViewModel {
 
             noteMap.put("lastChanges", changes);
             noteReference.updateChildren(noteMap);
-
-            view.showInformer(R.string.saved);
         }
     }
 

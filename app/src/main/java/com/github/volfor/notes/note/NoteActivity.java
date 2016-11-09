@@ -151,6 +151,7 @@ public class NoteActivity extends AppCompatActivity implements NoteView {
     @Override
     public void onBackPressed() {
         viewModel.saveNote();
+        showInformer(R.string.saved);
         super.onBackPressed();
     }
 
