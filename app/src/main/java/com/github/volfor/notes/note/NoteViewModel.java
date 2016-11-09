@@ -423,6 +423,13 @@ public class NoteViewModel extends BaseViewModel {
     }
 
     public void saveNote() {
+        if (TextUtils.isEmpty(title.get()) && TextUtils.isEmpty(text.get())) {
+            if (note.images.isEmpty() && note.audio == null) {
+                noteReference.removeValue();
+                return;
+            }
+        }
+
         if (!title.get().equals(note.title) || !text.get().equals(note.text)) {
             Map<String, Object> noteMap = new HashMap<>();
             noteMap.put("title", title.get().trim());
@@ -435,6 +442,8 @@ public class NoteViewModel extends BaseViewModel {
 
             noteMap.put("lastChanges", changes);
             noteReference.updateChildren(noteMap);
+
+            view.showInformer(R.string.saved);
         }
     }
 
