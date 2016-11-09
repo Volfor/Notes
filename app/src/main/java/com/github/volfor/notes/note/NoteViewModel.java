@@ -11,6 +11,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.text.TextUtils;
 import android.view.View;
 import android.widget.SeekBar;
 import android.widget.Toast;
@@ -188,6 +189,11 @@ public class NoteViewModel extends BaseViewModel {
                 ref = ref.child("images");
                 path = getRealPathFromUri(context, data.getData());
 
+                if (TextUtils.isEmpty(path)) {
+                    view.showInformer(R.string.attachment_error);
+                    return;
+                }
+
                 note.images.add(0, path);
                 adapter.changeList(note.images);
                 try {
@@ -200,6 +206,11 @@ public class NoteViewModel extends BaseViewModel {
             if (requestCode == CAMERA_REQUEST) {
                 ref = ref.child("images");
                 path = getRealPathFromUri(context, capturedImageUri);
+
+                if (TextUtils.isEmpty(path)) {
+                    view.showInformer(R.string.attachment_error);
+                    return;
+                }
 
                 note.images.add(0, path);
                 adapter.changeList(note.images);
@@ -218,6 +229,11 @@ public class NoteViewModel extends BaseViewModel {
 
                 ref = ref.child("audios");
                 path = getRealPathFromUri(context, data.getData());
+
+                if (TextUtils.isEmpty(path)) {
+                    view.showInformer(R.string.attachment_error);
+                    return;
+                }
 
                 Audio audio = new Audio();
                 audio.local = data.getData().toString();
@@ -406,7 +422,7 @@ public class NoteViewModel extends BaseViewModel {
         };
     }
 
-    public void onBackPressed() {
+    public void saveNote() {
         if (!title.get().equals(note.title) || !text.get().equals(note.text)) {
             Map<String, Object> noteMap = new HashMap<>();
             noteMap.put("title", title.get().trim());
@@ -442,6 +458,7 @@ public class NoteViewModel extends BaseViewModel {
     }
 
     public void shareWithUser(User user) {
+        saveNote();
         noteReference.child("contributors").child(user.id).setValue(user);
     }
 

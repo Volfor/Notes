@@ -33,4 +33,5 @@
     <string name="empty_title_warning">Title can\'t be empty</string>
     <string name="empty_text_warning">Text can\'t be empty</string>
     <string name="image_deleted">Image deleted</string>
+    <string name="attachment_error">Attachment error</string>
 </resources>

@@ -17,7 +17,10 @@ public class Utils {
             cursor.moveToFirst();
             return cursor.getString(column_index);
         } catch (Exception e) {
-            return contentUri.getPath();
+            if (contentUri != null) {
+                return contentUri.getPath();
+            }
+            return "";
         } finally {
             if (cursor != null) {
                 cursor.close();
