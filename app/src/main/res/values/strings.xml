@@ -34,4 +34,7 @@
     <string name="empty_text_warning">Text can\'t be empty</string>
     <string name="image_deleted">Image deleted</string>
     <string name="attachment_error">Attachment error</string>
+    <string name="error_loading_audio">Error loading audio</string>
+    <string name="format_not_supported">Format not supported</string>
+    <string name="pick_color">Pick color</string>
 </resources>

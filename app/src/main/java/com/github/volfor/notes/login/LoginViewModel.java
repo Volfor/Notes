@@ -46,7 +46,6 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     }
 
     private void init(final FragmentActivity activity) {
-        // Configure Google Sign In
         GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(activity.getString(R.string.default_web_client_id))
                 .requestEmail()
@@ -64,14 +63,11 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
                 FirebaseUser user = firebaseAuth.getCurrentUser();
                 if (user != null) {
-                    // User is signed in
                     Timber.d("onAuthStateChanged:signed_in:%s", user.getUid());
 
                     saveUser(user);
-
                     view.startNoteListActivity();
                 } else {
-                    // User is signed out
                     Timber.d("onAuthStateChanged:signed_out");
                 }
             }
@@ -84,17 +80,13 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
     }
 
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Result returned from launching the Intent from GoogleSignInApi.getSignInIntent(...);
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             if (result.isSuccess()) {
-                // Google Sign In was successful, authenticate with Firebase
                 GoogleSignInAccount account = result.getSignInAccount();
                 firebaseAuthWithGoogle(account);
             } else {
                 view.hideProgressDialog();
-                // Google Sign In failed, update UI appropriately
-                // ...
             }
         }
     }
@@ -108,8 +100,6 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        // An unresolvable error has occurred and Google APIs (including Sign-In) will not
-        // be available.
         Timber.d("onConnectionFailed:%s", connectionResult);
         view.showMessage("Google Play Services error.");
 
@@ -132,9 +122,7 @@ public class LoginViewModel extends BaseViewModel implements GoogleApiClient.OnC
                         Timber.d("signInWithCredential:onComplete:%s", task.isSuccessful());
 
                         view.hideProgressDialog();
-                        // If sign in fails, display a message to the user. If sign in succeeds
-                        // the auth state listener will be notified and logic to handle the
-                        // signed in user can be handled in the listener.
+
                         if (!task.isSuccessful()) {
                             Timber.w(task.getException(), "signInWithCredential");
                             view.showMessage("Authentication failed");

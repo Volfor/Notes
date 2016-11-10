@@ -7,9 +7,11 @@ import android.databinding.Bindable;
 import android.databinding.ObservableBoolean;
 import android.databinding.ObservableField;
 import android.databinding.ObservableInt;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
+import android.support.annotation.ColorInt;
 import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
@@ -18,6 +20,7 @@ import android.widget.Toast;
 
 import com.github.volfor.notes.BaseViewModel;
 import com.github.volfor.notes.R;
+import com.github.volfor.notes.Utils;
 import com.github.volfor.notes.model.Audio;
 import com.github.volfor.notes.model.LastChanges;
 import com.github.volfor.notes.model.Note;
@@ -33,11 +36,11 @@ import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
+import com.thebluealliance.spectrum.SpectrumDialog;
 
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.IOException;
 import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -50,7 +53,8 @@ import java.util.concurrent.TimeUnit;
 
 import timber.log.Timber;
 
-import static com.github.volfor.notes.Utils.getRealPathFromUri;
+import static com.github.volfor.notes.Utils.getAudioPathFromContentUri;
+import static com.github.volfor.notes.Utils.getImagePathFromUri;
 
 public class NoteViewModel extends BaseViewModel {
 
@@ -66,6 +70,7 @@ public class NoteViewModel extends BaseViewModel {
     public ObservableField<String> text = new ObservableField<>("");
     public ObservableField<String> lastChanges = new ObservableField<>("");
     public ObservableBoolean lastChangesVisibility = new ObservableBoolean(false);
+    public ObservableInt color = new ObservableInt(-1);
 
     private boolean isFirstStart = true;
 
@@ -77,7 +82,7 @@ public class NoteViewModel extends BaseViewModel {
     public ObservableBoolean isPlaying = new ObservableBoolean(false);
 
     public MediaPlayer player;
-    private Uri currentAudio;
+    private String currentAudio;
 
     public Uri capturedImageUri;
 
@@ -141,6 +146,8 @@ public class NoteViewModel extends BaseViewModel {
                     }
                 }
 
+                color.set(note.color);
+
                 if (note.images == null) {
                     note.images = new ArrayList<>();
                 }
@@ -159,9 +166,7 @@ public class NoteViewModel extends BaseViewModel {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-                // Getting Post failed, log a message
                 Timber.w(databaseError.toException(), "loadPost:onCancelled");
-
                 Toast.makeText(context, "Failed to load note.", Toast.LENGTH_SHORT).show();
             }
         };
@@ -182,12 +187,12 @@ public class NoteViewModel extends BaseViewModel {
 
             if (requestCode == PICK_IMAGE) {
                 if (data == null) {
-                    // Display an error
+                    view.showInformer(R.string.attachment_error);
                     return;
                 }
 
                 ref = ref.child("images");
-                path = getRealPathFromUri(context, data.getData());
+                path = getImagePathFromUri(context, data.getData());
 
                 if (TextUtils.isEmpty(path)) {
                     view.showInformer(R.string.attachment_error);
@@ -205,7 +210,7 @@ public class NoteViewModel extends BaseViewModel {
 
             if (requestCode == CAMERA_REQUEST) {
                 ref = ref.child("images");
-                path = getRealPathFromUri(context, capturedImageUri);
+                path = getImagePathFromUri(context, capturedImageUri);
 
                 if (TextUtils.isEmpty(path)) {
                     view.showInformer(R.string.attachment_error);
@@ -223,15 +228,26 @@ public class NoteViewModel extends BaseViewModel {
 
             if (requestCode == PICK_AUDIO) {
                 if (data == null) {
-                    // Display an error
+                    view.showInformer(R.string.attachment_error);
                     return;
                 }
 
                 ref = ref.child("audios");
-                path = getRealPathFromUri(context, data.getData());
+                try {
+                    path = getAudioPathFromContentUri(context, data.getData());
+                } catch (Exception e) {
+                    Timber.e(e, e.getMessage());
+                }
 
                 if (TextUtils.isEmpty(path)) {
                     view.showInformer(R.string.attachment_error);
+                    return;
+                }
+
+                String ext = path.substring(path.lastIndexOf('.') + 1);
+                if (!ext.equals("mp3") && !ext.equals("flac") && !ext.equals("ogg")
+                        && !ext.equals("wav") && !ext.equals("m4a")) {
+                    view.showInformer(R.string.format_not_supported);
                     return;
                 }
 
@@ -301,66 +317,78 @@ public class NoteViewModel extends BaseViewModel {
     private void initPlayer(Context context, Audio audio) {
         songName.set(audio.name);
 
-        final MediaPlayer.OnCompletionListener onCompletionListener = new MediaPlayer.OnCompletionListener() {
-            @Override
-            public void onCompletion(MediaPlayer mediaPlayer) {
-                mediaPlayer.seekTo(0);
-                isPlaying.set(false);
-            }
-        };
+        String path = null;
+        boolean isLocal = false;
 
-        Uri local = null;
-        Uri remote = null;
-        if (audio.local != null && new File(getRealPathFromUri(context, Uri.parse(audio.local))).exists()) {
-            local = Uri.parse(audio.local);
+        try {
+            if (audio.local != null) {
+                isLocal = new File(getAudioPathFromContentUri(context, Uri.parse(audio.local))).exists();
+            }
+        } catch (Exception e) {
+            Timber.e(e, e.getMessage());
+        }
+
+        if (isLocal) {
+            path = audio.local;
         } else if (audio.remote != null) {
-            remote = Uri.parse(audio.remote);
+            path = audio.remote;
         }
 
-        if (local != null) {
-            if (local.equals(currentAudio)) {
-                return;
-            }
+        if (TextUtils.isEmpty(path) || path.equals(currentAudio)) {
+            return;
+        }
 
-            player = MediaPlayer.create(context, local);
-            playerBlockVisibility.set(true);
-            isPlaying.set(false);
+        playerLoading.set(true);
 
-            elapsed.set(0);
-            duration.set(player.getDuration());
-            player.setOnCompletionListener(onCompletionListener);
+        if (player != null) {
+            player.release();
+        }
 
-            currentAudio = local;
-        } else if (remote != null) {
-            if (remote.equals(currentAudio)) {
-                return;
-            }
+        player = new MediaPlayer();
+        player.setAudioStreamType(AudioManager.STREAM_MUSIC);
 
-            playerLoading.set(true);
-            player = new MediaPlayer();
+        try {
+            Utils.setMediaPlayerDataSource(context, player, path);
+        } catch (Exception e) {
+            Timber.e(e, e.getMessage());
 
-            try {
-                player.setDataSource(audio.remote);
-            } catch (IOException e) {
+            playerLoading.set(false);
+            view.showInformer(R.string.error_loading_audio);
+            return;
+        }
+
+        player.prepareAsync();
+
+        final String finalPath = path;
+        player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+            @Override
+            public void onPrepared(MediaPlayer mediaPlayer) {
                 playerLoading.set(false);
-                Timber.e(e, e.getMessage());
+                playerBlockVisibility.set(true);
+                isPlaying.set(false);
+
+                elapsed.set(0);
+                duration.set(player.getDuration());
+                player.setOnCompletionListener(new MediaPlayer.OnCompletionListener() {
+                    @Override
+                    public void onCompletion(MediaPlayer mediaPlayer) {
+                        mediaPlayer.seekTo(0);
+                        isPlaying.set(false);
+                    }
+                });
+
+                currentAudio = finalPath;
             }
+        });
 
-            player.prepareAsync();
-            player.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mediaPlayer) {
-                    playerLoading.set(false);
-                    playerBlockVisibility.set(true);
-                    isPlaying.set(false);
-
-                    elapsed.set(0);
-                    duration.set(player.getDuration());
-                    player.setOnCompletionListener(onCompletionListener);
-                }
-            });
-            currentAudio = remote;
-        }
+        player.setOnErrorListener(new MediaPlayer.OnErrorListener() {
+            @Override
+            public boolean onError(MediaPlayer mediaPlayer, int i, int i1) {
+                playerLoading.set(false);
+                view.showInformer(R.string.error_loading_audio);
+                return false;
+            }
+        });
     }
 
     public void play() {
@@ -430,6 +458,7 @@ public class NoteViewModel extends BaseViewModel {
             }
         }
 
+//        if (!title.get().equals(note.title) || !text.get().equals(note.text) || color.get() != note.color) {
         if (!title.get().equals(note.title) || !text.get().equals(note.text)) {
             Map<String, Object> noteMap = new HashMap<>();
             noteMap.put("title", title.get().trim());
@@ -462,6 +491,18 @@ public class NoteViewModel extends BaseViewModel {
             String mergedText = text.get() + "\n<--- " + note.lastChanges.authorName + " changes --->" + "\n" + note.text;
             text.set(mergedText);
         }
+    }
+
+    public void pickColor() {
+        SpectrumDialog.OnColorSelectedListener listener = new SpectrumDialog.OnColorSelectedListener() {
+            @Override
+            public void onColorSelected(boolean positiveResult, @ColorInt int chosenColor) {
+                color.set(chosenColor);
+                noteReference.child("color").setValue(chosenColor);
+            }
+        };
+
+        view.showColorPicker(color.get(), listener);
     }
 
     public void shareWithUser(User user) {

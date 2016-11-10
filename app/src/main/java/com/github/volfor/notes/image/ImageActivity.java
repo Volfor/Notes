@@ -10,9 +10,15 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.github.volfor.notes.BindAdapters;
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.databinding.ActivityImageBinding;
+import com.github.volfor.notes.model.Note;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Locale;
@@ -26,6 +32,9 @@ public class ImageActivity extends AppCompatActivity {
     private int position;
     private int currentPosition;
 
+    private DatabaseReference ref;
+
+    private ImagesPagerAdapter adapter;
     private ActionBar supportActionBar;
 
     @Override
@@ -40,6 +49,21 @@ public class ImageActivity extends AppCompatActivity {
             images = extras.getStringArrayList("images");
         }
 
+        ref = FirebaseDatabase.getInstance().getReference().child("notes").child(noteId);
+
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Note note = dataSnapshot.getValue(Note.class);
+                BindAdapters.bindToolbarColor(binding.include.toolbar, note.color);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
         setSupportActionBar(binding.include.toolbar);
 
         supportActionBar = getSupportActionBar();
@@ -53,7 +77,8 @@ public class ImageActivity extends AppCompatActivity {
     private void setupViewPager(final ViewPager pager) {
         setActionBarTitle(position);
 
-        pager.setAdapter(new ImagesPagerAdapter(images));
+        adapter = new ImagesPagerAdapter(images);
+        pager.setAdapter(adapter);
         pager.setPageMargin(40);
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
@@ -104,13 +129,9 @@ public class ImageActivity extends AppCompatActivity {
 
     private void deleteImage(int position) {
         images.remove(position);
+        adapter.notifyDataSetChanged();
 
-        FirebaseDatabase.getInstance()
-                .getReference()
-                .child("notes")
-                .child(noteId)
-                .child("images")
-                .setValue(images);
+        ref.child("images").setValue(images);
 
         Toast.makeText(this, R.string.image_deleted, Toast.LENGTH_SHORT).show();
         finish();

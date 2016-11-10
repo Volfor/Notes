@@ -15,7 +15,8 @@
 
         <include
             android:id="@+id/include"
-            layout="@layout/toolbar" />
+            layout="@layout/toolbar"
+            bind:color="@{viewModel.color}" />
 
         <android.support.v4.widget.NestedScrollView
             android:layout_width="match_parent"

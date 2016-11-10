@@ -19,8 +19,14 @@
         app:showAsAction="always" />
 
     <item
+        android:id="@+id/pick_color"
+        android:icon="@drawable/ic_palette_white_24dp"
+        android:title="@string/pick_color"
+        app:showAsAction="always" />
+
+    <item
         android:id="@+id/share_note"
-        android:icon="@drawable/ic_share_white_24dp"
+        android:icon="@drawable/ic_person_add_white_24dp"
         android:title="@string/share"
         app:showAsAction="ifRoom" />
 

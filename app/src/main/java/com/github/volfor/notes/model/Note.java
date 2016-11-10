@@ -16,6 +16,7 @@ public class Note {
     public List<String> images;
     public Audio audio;
     public LastChanges lastChanges;
+    public int color;
 
     public Note() {
     }

@@ -3,9 +3,11 @@ package com.github.volfor.notes;
 import android.databinding.BindingAdapter;
 import android.databinding.BindingConversion;
 import android.net.Uri;
+import android.support.annotation.ColorInt;
 import android.support.v7.widget.GridLayoutManager;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.SeekBar;
@@ -68,6 +70,15 @@ public class BindAdapters {
                 .load(url)
                 .placeholder(R.drawable.image_placeholder)
                 .into(v);
+    }
+
+    @BindingAdapter({"toolbarColor"})
+    public static void bindToolbarColor(Toolbar v, @ColorInt int color) {
+        if (color == 0 || color == -1) {
+            v.setBackgroundColor(v.getResources().getColor(R.color.colorPrimary));
+        } else {
+            v.setBackgroundColor(color);
+        }
     }
 
 }

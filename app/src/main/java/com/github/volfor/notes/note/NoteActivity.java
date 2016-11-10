@@ -6,6 +6,7 @@ import android.content.Intent;
 import android.databinding.DataBindingUtil;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.support.annotation.ColorInt;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v7.app.ActionBar;
@@ -25,6 +26,7 @@ import com.github.volfor.notes.info.InfoActivity;
 import com.github.volfor.notes.model.User;
 import com.github.volfor.notes.sharing.UsersAutoCompleteAdapter;
 import com.google.firebase.auth.FirebaseAuth;
+import com.thebluealliance.spectrum.SpectrumDialog;
 
 import static com.github.volfor.notes.note.NoteViewModel.CAMERA_REQUEST;
 import static com.github.volfor.notes.note.NoteViewModel.PICK_AUDIO;
@@ -89,6 +91,9 @@ public class NoteActivity extends AppCompatActivity implements NoteView {
                 break;
             case R.id.attach_audio:
                 pickAudio();
+                break;
+            case R.id.pick_color:
+                viewModel.pickColor();
                 break;
             case R.id.share_note:
                 AlertDialog.Builder dialogBuilder = new AlertDialog.Builder(this);
@@ -216,5 +221,15 @@ public class NoteActivity extends AppCompatActivity implements NoteView {
     protected void onDestroy() {
         viewModel.stop();
         super.onDestroy();
+    }
+
+    public void showColorPicker(@ColorInt int selectedColor, SpectrumDialog.OnColorSelectedListener listener) {
+        new SpectrumDialog.Builder(this)
+                .setColors(R.array.note_colors)
+                .setSelectedColor(selectedColor)
+                .setDismissOnColorSelected(false)
+                .setOnColorSelectedListener(listener)
+                .build()
+                .show(getSupportFragmentManager(), "colors_dialog");
     }
 }

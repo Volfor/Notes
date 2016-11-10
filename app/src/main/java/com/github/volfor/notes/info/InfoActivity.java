@@ -10,8 +10,10 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
+import com.github.volfor.notes.BindAdapters;
 import com.github.volfor.notes.R;
 import com.github.volfor.notes.databinding.ActivityInfoBinding;
+import com.github.volfor.notes.model.Note;
 import com.github.volfor.notes.model.User;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -24,14 +26,12 @@ public class InfoActivity extends AppCompatActivity implements InfoView {
     private ActivityInfoBinding binding;
     private FirebaseRecyclerAdapter adapter;
 
-    private User author;
-
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         binding = DataBindingUtil.setContentView(this, R.layout.activity_info);
 
-        author = (User) getIntent().getSerializableExtra("author");
+        User author = (User) getIntent().getSerializableExtra("author");
         binding.setAuthor(author);
 
         setSupportActionBar(binding.include.toolbar);
@@ -45,6 +45,19 @@ public class InfoActivity extends AppCompatActivity implements InfoView {
                 .getReference()
                 .child("notes")
                 .child(getIntent().getStringExtra("key"));
+
+        ref.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Note note = dataSnapshot.getValue(Note.class);
+                BindAdapters.bindToolbarColor(binding.include.toolbar, note.color);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
         ref.child("contributors").addValueEventListener(new ValueEventListener() {
             @Override
@@ -63,7 +76,6 @@ public class InfoActivity extends AppCompatActivity implements InfoView {
         });
 
         adapter = new ContributorsAdapter(this, author.id, ref.child("contributors"));
-        binding.contributorsList.setHasFixedSize(true);
         binding.contributorsList.setNestedScrollingEnabled(false);
         binding.contributorsList.setLayoutManager(new LinearLayoutManager(binding.contributorsList.getContext()) {
             @Override
