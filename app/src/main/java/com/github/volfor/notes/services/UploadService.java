@@ -97,16 +97,29 @@ public class UploadService extends Service {
                                     Map<String, Object> audioMap = new HashMap<>();
                                     audioMap.put("remote", downloadUrl.toString());
                                     noteReference.child("audio").updateChildren(audioMap);
+
+                                    saveLastChanges(noteReference);
+
+                                    stopSelf();
                                 } else {
                                     noteReference.child("images").addListenerForSingleValueEvent(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             List<String> images = (ArrayList<String>) dataSnapshot.getValue();
+
+                                            if (images == null) {
+                                                images = new ArrayList<>();
+                                            }
+
                                             images.add(0, downloadUrl.toString());
 
                                             Map<String, Object> imagesMap = new HashMap<>();
                                             imagesMap.put("images", images);
                                             noteReference.updateChildren(imagesMap);
+
+                                            saveLastChanges(noteReference);
+
+                                            stopSelf();
                                         }
 
                                         @Override
@@ -115,15 +128,6 @@ public class UploadService extends Service {
                                         }
                                     });
                                 }
-
-                                LastChanges changes = new LastChanges();
-                                changes.time = System.currentTimeMillis();
-                                changes.authorName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
-                                changes.authorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                                noteReference.child("lastChanges").setValue(changes);
-
-                                stopSelf();
                             }
                         }
                     });
@@ -132,6 +136,15 @@ public class UploadService extends Service {
         }
 
         return Service.START_NOT_STICKY;
+    }
+
+    private void saveLastChanges(DatabaseReference noteRef) {
+        LastChanges changes = new LastChanges();
+        changes.time = System.currentTimeMillis();
+        changes.authorName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        changes.authorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
+        noteRef.child("lastChanges").setValue(changes);
     }
 
     @Nullable
