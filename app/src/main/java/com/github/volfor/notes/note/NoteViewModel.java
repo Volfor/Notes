@@ -12,7 +12,6 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Handler;
 import android.support.annotation.ColorInt;
-import android.support.annotation.NonNull;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.SeekBar;
@@ -25,23 +24,16 @@ import com.github.volfor.notes.model.Audio;
 import com.github.volfor.notes.model.LastChanges;
 import com.github.volfor.notes.model.Note;
 import com.github.volfor.notes.model.User;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
+import com.github.volfor.notes.services.UploadService;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 import com.thebluealliance.spectrum.SpectrumDialog;
 
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -182,16 +174,12 @@ public class NoteViewModel extends BaseViewModel {
             }
 
             String path = "";
-            InputStream stream = null;
-            StorageReference ref = FirebaseStorage.getInstance().getReference();
-
             if (requestCode == PICK_IMAGE) {
                 if (data == null) {
                     view.showInformer(R.string.attachment_error);
                     return;
                 }
 
-                ref = ref.child("images");
                 path = getImagePathFromUri(context, data.getData());
 
                 if (TextUtils.isEmpty(path)) {
@@ -201,15 +189,9 @@ public class NoteViewModel extends BaseViewModel {
 
                 note.images.add(0, path);
                 adapter.changeList(note.images);
-                try {
-                    stream = new FileInputStream(path);
-                } catch (FileNotFoundException e) {
-                    Timber.e(e, e.getMessage());
-                }
             }
 
             if (requestCode == CAMERA_REQUEST) {
-                ref = ref.child("images");
                 path = getImagePathFromUri(context, capturedImageUri);
 
                 if (TextUtils.isEmpty(path)) {
@@ -219,11 +201,6 @@ public class NoteViewModel extends BaseViewModel {
 
                 note.images.add(0, path);
                 adapter.changeList(note.images);
-                try {
-                    stream = new FileInputStream(new File(path));
-                } catch (FileNotFoundException e) {
-                    Timber.e(e, e.getMessage());
-                }
             }
 
             if (requestCode == PICK_AUDIO) {
@@ -232,7 +209,6 @@ public class NoteViewModel extends BaseViewModel {
                     return;
                 }
 
-                ref = ref.child("audios");
                 try {
                     path = getAudioPathFromContentUri(context, data.getData());
                 } catch (Exception e) {
@@ -257,53 +233,20 @@ public class NoteViewModel extends BaseViewModel {
                 noteReference.child("audio").setValue(audio);
 
                 initPlayer(context, audio);
-
-                try {
-                    stream = new FileInputStream(path);
-                } catch (FileNotFoundException e) {
-                    Timber.e(e, e.getMessage());
-                }
             }
 
-            if (stream != null) {
-                String filename = path.substring(path.lastIndexOf('/') + 1);
-                ref = ref.child(note.noteId).child(new Date().getTime() + "_" + filename);
+            if (!TextUtils.isEmpty(path)) {
+                Intent uploadServiceIntent = new Intent(context, UploadService.class);
+                if (requestCode == PICK_AUDIO) {
+                    uploadServiceIntent.putExtra(UploadService.EXTRA_MEDIA_TYPE, UploadService.MEDIA_TYPE_AUDIO);
+                } else {
+                    uploadServiceIntent.putExtra(UploadService.EXTRA_MEDIA_TYPE, UploadService.MEDIA_TYPE_IMAGES);
+                }
 
-                UploadTask uploadTask = ref.putStream(stream);
-                uploadTask.addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                    }
-                }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                        taskSnapshot.getStorage().getPath();
+                uploadServiceIntent.putExtra(UploadService.EXTRA_NOTE_ID, noteId);
+                uploadServiceIntent.putExtra(UploadService.EXTRA_PATH, path);
 
-                        if (downloadUrl != null) {
-                            Map<String, Object> mediaMap = new HashMap<>();
-                            if (requestCode == PICK_AUDIO) {
-                                mediaMap.put("remote", downloadUrl.toString());
-                                noteReference.child("audio").updateChildren(mediaMap);
-                            } else {
-                                note.images.remove(0);
-                                note.images.add(0, downloadUrl.toString());
-                                adapter.changeList(note.images);
-                                mediaMap.put("images", note.images);
-
-                                noteReference.updateChildren(mediaMap);
-                            }
-
-                            LastChanges changes = new LastChanges();
-                            changes.time = System.currentTimeMillis();
-                            changes.authorName = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
-                            changes.authorId = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-                            noteReference.child("lastChanges").setValue(changes);
-                        }
-                    }
-                });
+                context.getApplicationContext().startService(uploadServiceIntent);
             }
         }
     }

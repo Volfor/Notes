@@ -32,5 +32,9 @@
         <activity
             android:name=".info.InfoActivity"
             android:label="Info" />
+
+        <service
+            android:name=".services.UploadService"
+            android:exported="false" />
     </application>
 </manifest>
